@@ -23,4 +23,4 @@ noteSchema.plugin(AutoIncrement, {
   start_seq:1
 })
 
-export default Note = mongoose.model('Note', noteSchema)
+export const Note = mongoose.model('Note', noteSchema)
