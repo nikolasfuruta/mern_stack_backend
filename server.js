@@ -1,13 +1,16 @@
+import 'dotenv/config';
 import express from 'express';
 
 import path from 'path';
 import * as url from 'url';
 import root from './routes/root.js';
-import { logger } from './middleware/loggerMiddleware.js'
+import { logger, logEvents  } from './middleware/loggerMiddleware.js'
 import { errorHandler } from './middleware/errorHandlerMiddleware.js'
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { corsOptions} from './config/corsOptions.js';
+import { connectDB } from './config/dbConn.js';
+import mongoose from 'mongoose';
 
 //this enables __dirname with ES modules
 const __dirname = url.fileURLToPath(new URL('.',import .meta.url));
@@ -15,6 +18,7 @@ const __dirname = url.fileURLToPath(new URL('.',import .meta.url));
 
 const PORT = process.env.PORT || 8080;
 const app = express();
+connectDB();
 
 //middlewares
 app.use(logger) //the logger comes first to capture all logs
@@ -39,6 +43,16 @@ app.get('*', (req,res) => {
 //error midleware
 app.use(errorHandler) //errorHandler comes last to capture all possible error
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+//listeners
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB');
+  app.listen(PORT, () => { console.log(`Server running on port ${PORT}`) });
+});
+
+mongoose.connection.on('error', (err) => {
+  console.log(err);
+  logEvents(
+    `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
+    'mongoErrorLog.log'
+  );
 })
