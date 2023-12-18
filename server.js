@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 
 import root from './routes/root.js';
 import { users } from './routes/userRoutes.js'
+import { notes } from './routes/noteRoutes.js'
 
 //this enables __dirname with ES modules
 const __dirname = url.fileURLToPath(new URL('.',import .meta.url));
@@ -30,6 +31,7 @@ app.use(cookieParser());
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use('/', root);
 app.use('/users', users);
+app.use('/notes', notes);
 
 //Not Found
 app.get('*', (req,res) => {
